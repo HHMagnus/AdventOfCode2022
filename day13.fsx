@@ -51,3 +51,17 @@ parsed
  |> List.map ((+) 1)
  |> List.sum
  |> printf "Day 13 (1): %A\n"
+
+let intCompare a b = compare a b |> Option.get |> (fun x -> if x then 1 else -1)
+
+parsed
+ |> List.collect (fun (x, y) -> [false, x;false, y])
+ |> (@) [(true, L([L([N(2)])])); (true, L([L([N(6)])]))]
+ |> List.sortWith (fun (_,x) (_,y) -> intCompare x y)
+ |> List.rev
+ |> List.mapi (fun i (x, _) -> i, x)
+ |> List.filter snd
+ |> List.map fst
+ |> List.map ((+) 1)
+ |> List.reduce (*)
+ |> printf "Day 13 (2): %A\n"
