@@ -9,10 +9,9 @@ let endd = int 'E' - int 'a'
 
 let rec bst (queue: (int * int * int) list) (seen: Set<int * int>) =
  match queue with
- | [] -> failwith "empty queue"
+ | [] -> 1000000
  | (x,y,l) :: xs ->
    let field = matrix[x][y]
-   printf "%A %A\n" (x,y,l) (char (field + int 'a'))
    if field = endd then l else
    let rn =
      [(x+1, y); (x, y+1); (x-1, y); (x, y-1)]
@@ -24,3 +23,15 @@ let rec bst (queue: (int * int * int) list) (seen: Set<int * int>) =
 
 bst [(startx,starty,0)] ([(startx,starty)] |> Set.ofList) |> printf "Day 12 (1): %A\n"
 // I hardcoded S to a for ease
+
+let acoords =
+ [0 .. matrix.Length-1]
+ |> List.collect (fun x -> [0 .. matrix[0].Length-1] |> List.map (fun y -> (x,y)))
+ |> List.filter (fun (x,y) -> matrix[x][y] = 0)
+
+let d2 =
+ acoords
+ |> List.map (fun (x,y) -> bst [(x,y,0)] ([(x,y)] |> Set.ofList))
+ |> List.min
+
+printf "Day 12 (2): %A\n" d2
