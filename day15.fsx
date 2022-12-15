@@ -38,3 +38,25 @@ let y = 2000000
 |> List.filter id
 |> List.length
 |> printf "Day 15 (1): %A\n"
+
+let tuningFrequency (x,y) = int64 x * int64 4000000 + int64 y
+
+let inRange (x,y) = x >= 0 && x <= 4000000 && y >= 0 && y <= 4000000
+
+let border (x,y) d = 
+ let l = x - d - 1
+ let r = x + d + 1
+ let u = y - d - 1
+ let d = y + d + 1
+ let s1 = List.zip [x .. r] [y .. d]
+ let s2 = List.zip [x .. r] [u .. y]
+ let s3 = List.zip [l .. x] [y .. d]
+ let s4 = List.zip [l .. x] [u .. y]
+ (s1 @ s2 @ s3 @ s4) |> List.filter inRange
+
+dsb
+|> List.map (fun (d, (x,y)) -> border (x,y) d)
+|> List.collect (List.filter (inRangeOfABeacon >> not))
+|> List.head
+|> tuningFrequency
+|> printf "Day 15 (2): %A\n"
