@@ -71,7 +71,7 @@ let turnRight dir =
 
 let start = (startX, 0)
 
-let translate pos dir =
+let translate1 pos dir =
  let (x, y) = pos
  match dir with
  | Up ->
@@ -95,20 +95,20 @@ let translate pos dir =
   let maxY = List.filter (fun (_, y1) -> y1 = y) positions |> List.map fst |> List.max
   (maxY, y)
 
-let rec move pos dir amount =
+let rec move1 pos dir amount =
  if amount = 0 then pos else
- let nPos = (translate pos dir)
+ let nPos = (translate1 pos dir)
  if map[nPos] = Rock then pos else
- move nPos dir (amount-1)
+ move1 nPos dir (amount-1)
 
 let rec part1 pos dir inst =
  match inst with
- | Inst.Right(x)::xs -> part1 (move pos dir x) (turnRight dir) xs
- | Inst.Left(x)::xs -> part1 (move pos dir x) (turnLeft dir) xs
- | Move(x)::xs -> part1 (move pos dir x) dir xs
+ | Inst.Right(x)::xs -> part1 (move1 pos dir x) (turnRight dir) xs
+ | Inst.Left(x)::xs -> part1 (move1 pos dir x) (turnLeft dir) xs
+ | Move(x)::xs -> part1 (move1 pos dir x) dir xs
  | [] -> pos, dir
 
-let rec part1calc (pos, dir) =
+let rec calcresult (pos, dir) =
  let (x, y) = pos
  let dirPart =
   match dir with
@@ -118,6 +118,71 @@ let rec part1calc (pos, dir) =
   | Up -> 3
  1000 * (y+1) + 4 * (x+1) + dirPart
 
-let part1res = part1 start Right instructions |> part1calc
+let part1res = part1 start Right instructions |> calcresult
 
 printf "Day 22 part 1: %A\n" part1res
+
+let wrapUp x =
+ if x < 50 then (50, 50 + x), Right else
+ if x < 100 then (0, 100 + x), Right else
+ (x - 100, 199), Up
+
+let wrapDown x =
+ if x < 50 then (x + 100, 0), Down else
+ if x < 100 then (49, 150 + x - 50), Left else
+ (99, 50 + x - 100), Left
+
+let wrapLeft y =
+ if y < 50 then (0, 149 - y), Right else
+ if y < 100 then (y - 50, 100), Down else
+ if y < 150 then (50, 149 - y), Right else
+ (y - 100, 0), Down
+
+let wrapRight y =
+ if y < 50 then (99, 149 - y), Left else
+ if y < 100 then (50 + y, 49), Up else
+ if y < 150 then (149, 149 - y), Left else
+ (50 + y - 150, 149), Up
+
+let translate2 pos dir =
+ let (x, y) = pos
+ match dir with
+ | Up ->
+  let nPos = (x, y - 1)
+  if Map.containsKey nPos map then nPos, dir else
+  wrapUp x
+ | Down -> 
+  let nPos = (x, y + 1)
+  if Map.containsKey nPos map then nPos, dir else
+  wrapDown x
+ | Right ->
+  let nPos = (x + 1, y)
+  if Map.containsKey nPos map then nPos, dir else
+  wrapRight y
+ | Left ->
+  let nPos = (x - 1, y)
+  if Map.containsKey nPos map then nPos, dir else
+  wrapLeft y
+
+let rec move2 pos dir amount =
+ if amount = 0 then pos, dir else
+ let nPos, nDir = (translate2 pos dir)
+ if map[nPos] = Rock then pos, dir else
+ move2 nPos nDir (amount-1)
+
+let rec part2 pos dir inst =
+ match inst with
+ | Inst.Right(x)::xs ->
+  let nPos, nDir = move2 pos dir x
+  part2 nPos (turnRight nDir) xs
+ | Inst.Left(x)::xs ->
+  let nPos, nDir = move2 pos dir x
+  part2 nPos (turnLeft nDir) xs
+ | Move(x)::xs ->
+  let nPos, nDir = move2 pos dir x
+  part2 nPos nDir xs
+ | [] -> pos, dir
+
+let part2res = part2 start Right instructions |> calcresult
+
+printf "Day 22 part 2: %A\n" part2res
