@@ -69,3 +69,15 @@ let calc (state: Set<(int * int)>) =
 let part1res = part1 input |> calc
 
 printf "Day 23 part 1: %A\n" part1res
+
+let part2 state =
+ let rec run i state dirs =
+  let nState = round state dirs
+  if nState = state then i+1 else 
+  let nDirs = dirs |> List.mapi (fun i x -> (if i = 0 then 4 else i), x) |> List.sortBy fst |> List.map snd
+  run (i+1) nState nDirs
+ run 0 state [North; South; West; East]
+
+let part2res = part2 input
+
+printf "Day 23 part 2: %A\n" part2res
