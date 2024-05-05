@@ -75,3 +75,24 @@ let part1 =
  part1 [(1, 0)] 0
 
 printf "Day 24 part 1: %A\n" part1
+
+let part2 =
+ let rec run positions minute e backlog =
+  let blizz = List.map (blizzardPos minute) blizzards
+  let valids: (int * int) list = List.filter (fun x -> List.contains x blizz |> not) positions
+  let nPositions = List.collect moves valids |> List.distinct
+  if List.contains e valids then
+   let nBacklog = minute::backlog
+   // The best on my dataset turned out to be fastest to goal, fastest back and fastest to goal again from the same minute. So waiting and end or start would not help
+   if List.length nBacklog = 1 then nBacklog else
+   run nPositions (minute+1) e nBacklog
+  else run nPositions (minute+1) e backlog
+ let top_ten = run [(1, 0)] 0 goal []
+
+ let back_top_ten = 
+  List.map (fun minute -> run [goal] minute (1, 0) []) top_ten
+  |> List.collect id
+  |> List.distinct
+
+ List.map (fun minute -> run [(1, 0)] minute goal []) back_top_ten |> List.collect id |> List.min
+printf "Day 24 part 2: %A\n" part2
